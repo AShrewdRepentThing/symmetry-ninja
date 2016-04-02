@@ -51,23 +51,23 @@ DIRDICT = {'L': -1.0, 'R': 1.0}
 
 # Projectile art asset locations
 
-FIREBALL_STR = '~/Desktop/coding/games/hacking/devgame/flame_sprites/fireball/scaled/fireball_000%i_%i.png'
+FIREBALL_STR = '~/Desktop/coding/games/symmetry-ninja/artassets/sprites/flames/fireball/scaled/fireball_000%i_%i.png'
 FIREBALL_FILE_PATH = os.path.expanduser(FIREBALL_STR)
-GRENADE_STR = '~/Desktop/coding/games/hacking/devgame/grenade_sprites/scaled/grenade_%i.png'
+GRENADE_STR = '~/Desktop/coding/games/symmetry-ninja/artassets/sprites/grenade/scaled/grenade_%i.png'
 GRENADE_FILE_PATH = os.path.expanduser(GRENADE_STR)
-GRENADE_EXPLOSION_STR = '/Users/enrightward/Desktop/coding/games/hacking/devgame/grenade_explosion_sprites/slice_%i.png'
+GRENADE_EXPLOSION_STR = '/Users/enrightward/Desktop/coding/games/symmetry-ninja/artassets/sprites/grenade_explosion/slice_%i.png'
 GRENADE_EXPLOSION_FILE_PATH = os.path.expanduser(GRENADE_EXPLOSION_STR)
 
 # Player art asset locations
 
-RUN_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/run/Run__00%i_%i.png')
-JUMP_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/jump/Jump__00%i_%i.png')
-ATTACK_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/attack/Attack__00%i_%i.png')
-GLIDE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/glide/Glide_00%i_%i.png')
-IDLE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/idle/Idle__00%i.png')
+RUN_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/run/Run__00%i_%i.png')
+JUMP_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/jump/Jump__00%i_%i.png')
+ATTACK_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/attack/Attack__00%i_%i.png')
+GLIDE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/glide/Glide_00%i_%i.png')
+IDLE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/idle/Idle__00%i.png')
 
 # Environment art asset locations
 
-TILES_SS_PATH = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/artassets/tiles_spritesheet.png')
-ANIMATED_BACKGROUND_FILEPATH = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/waterfall/png/frame_%i.png')
+TILES_SS_PATH = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/tilesets/basic_tiles.png')
+ANIMATED_BACKGROUND_FILEPATH = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/waterfall/png/frame_%i.png')
 BACKGROUND_ANIMATION_PERIOD = 5
