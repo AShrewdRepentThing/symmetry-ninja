@@ -2,9 +2,8 @@ import os, pygame
 import platforms
 import constants
 from load_animation_frames import load_animation_frames
+from constants import ANIMATED_BACKGROUND_FILEPATH, BACKGROUND_ANIMATION_PERIOD
 
-ANIMATED_BACKGROUND_FILEPATH = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/waterfall/png/frame_%i.png')
-BACKGROUND_ANIMATION_PERIOD = 5
 
 class Level(object):
 

@@ -1,18 +1,7 @@
 import os, pygame
 from spritesheet_functions import SpriteSheet
+from constants import TILES_SS_PATH
 
-# Global constants
-
-# Colors
-BLACK  = (  0,   0,   0)
-WHITE  = (255, 255, 255)
-BLUE   = (  0,   0, 255)
-RED    = (255,   0,   0)
-GREEN  = (  0, 255,   0)
-PINK   = (255,  20, 147)
-
-ANIMATED_BACKGROUND_FILEPATH = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/waterfall/png/frame_%i.png')
-TILES_SS_PATH = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/artassets/tiles_spritesheet.png')
 
 class Platform(pygame.sprite.Sprite):
 
@@ -25,10 +14,6 @@ class Platform(pygame.sprite.Sprite):
                                             sprite_sheet_data[2],
                                             sprite_sheet_data[3])
         self.rect = self.image.get_rect()
-
-        #self.image = pygame.Surface([width, height])
-        #self.image.fill(GREEN)
-        #self.rect = self.image.get_rect()
 
 
 class MovingPlatform(Platform):

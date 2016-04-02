@@ -1,34 +1,14 @@
 import os, pygame, platforms, projectiles
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
-
-# Global constants
-
-MIN_SPEED = 10
-MAX_SPEED = 15
-MAX_FRAME_RATE = 60
-ACCELERATION_PERIOD = 0.75
-
-JUMPSPEED = 25
-JUMPCOUNT = 2
-JUMP_PERIOD = 20
-ACCELERATION = 1.5
-GLIDE_ACCELERATION = 0.2
-DRIFT_DECEL = 1.1
-
-# Screen dimensions
-SCREEN_WIDTH  = 800
-SCREEN_HEIGHT = 600
-DIRDICT = {'L': -1.0, 'R': 1.0}
-
+from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD
+from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION
+from constants import GLIDE_ACCELERATION, DRIFT_DECEL, SCREEN_WIDTH
+from constants import SCREEN_HEIGHT, DIRDICT
+from constants import RUN_FILE_STEM, JUMP_FILE_STEM, ATTACK_FILE_STEM, GLIDE_FILE_STEM, IDLE_FILE_STEM
 
 class Player(pygame.sprite.Sprite):
 
-    """
-    This class represents the player.
-    """
-
     def __init__(self):
-        # Call the parent's constructor
         super(Player, self).__init__()
 
         self.is_jumping = False
@@ -66,22 +46,13 @@ class Player(pygame.sprite.Sprite):
         self.level = None
 
         keyframe_range, tween_range = range(10), range(1, 6)
-
-        run_file_stem = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/run/Run__00%i_%i.png')
-        self.walking_frames = load_animation_frames_key_tween(run_file_stem, keyframe_range, tween_range)
-
-        jump_file_stem = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/jump/Jump__00%i_%i.png')
-        self.jump_frames = load_animation_frames_key_tween(jump_file_stem, keyframe_range, tween_range)
-
-        attack_file_stem = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/attack/Attack__00%i_%i.png')
-        self.attack_frames = load_animation_frames_key_tween(attack_file_stem, keyframe_range, tween_range)
-
-        glide_file_stem = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/glide/Glide_00%i_%i.png')
-        self.gliding_frames = load_animation_frames_key_tween(glide_file_stem, keyframe_range, tween_range)
+        self.walking_frames = load_animation_frames_key_tween(RUN_FILE_STEM, keyframe_range, tween_range)
+        self.jump_frames = load_animation_frames_key_tween(JUMP_FILE_STEM, keyframe_range, tween_range)
+        self.attack_frames = load_animation_frames_key_tween(ATTACK_FILE_STEM, keyframe_range, tween_range)
+        self.gliding_frames = load_animation_frames_key_tween(GLIDE_FILE_STEM, keyframe_range, tween_range)
 
         image_indices = range(10)
-        idle_file_stem = os.path.expanduser('~/Desktop/coding/games/hacking/devgame/ninjasprites/sixtyfps/idle/Idle__00%i.png')
-        self.idle_frames = load_animation_frames(idle_file_stem, image_indices)
+        self.idle_frames = load_animation_frames(IDLE_FILE_STEM, image_indices)
 
         # Set the image the player starts with
         self.image = self.idle_frames['R'][0]

@@ -1,7 +1,11 @@
 import os, pygame
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
+from constants import GUN_HEIGHT, DIRDICT, FIREBALL_FILE_PATH, GRENADE_FILE_PATH
+from constants import GRENADE_EXPLOSION_STR, GRENADE_EXPLOSION_FILE_PATH, GRENADE_PERIOD
+from constants import FIREBALL_PERIOD, GRENADE_EXPLOSION_PERIOD, EXPLOSION_Y_OFFSET
+from constants import EXPLOSION_X_OFFSET, SCREEN_WIDTH, SCREEN_HEIGHT
 
-# Global constants
+"""
 
 GUN_HEIGHT = 0.0
 DIRDICT = {'L': -1.0, 'R': 1.0}
@@ -23,6 +27,8 @@ EXPLOSION_X_OFFSET = 10
 
 SCREEN_WIDTH  = 800
 SCREEN_HEIGHT = 600
+
+"""
 
 
 class Projectile(pygame.sprite.Sprite):

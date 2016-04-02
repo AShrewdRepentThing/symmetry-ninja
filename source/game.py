@@ -1,19 +1,17 @@
 import os, pygame, time, levels
 from player import Player
+from constants import SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_SIZE, MAX_FRAME_RATE, IS_FULLSCREEN
 
-# Global constants
-
-SCREEN_WIDTH  = 800
-SCREEN_HEIGHT = 600
-MAX_FRAME_RATE = 60
 
 def main():
     """ Main Program """
     pygame.init()
 
     # Set the height and width of the screen
-    size = [SCREEN_WIDTH, SCREEN_HEIGHT]
-    screen = pygame.display.set_mode(size)
+    if IS_FULLSCREEN:
+        screen = pygame.display.set_mode(SCREEN_SIZE, pygame.FULLSCREEN)
+    else:
+        screen = pygame.display.set_mode(SCREEN_SIZE)
 
     pygame.display.set_caption("Platformer with moving platforms")
 
