@@ -284,15 +284,13 @@ class Player(pygame.sprite.Sprite):
         self.is_firing_grenade = True
 
     def _create_fireball(self):
-        acceleration = 0.0
         velocity = (15, 0)
         _type = 'fireball'
-        projectile = projectiles.Projectile(self, velocity, acceleration, _type)
+        projectile = projectiles.Projectile(self, velocity, _type)
         self.level.projectile_list.add(projectile)
 
     def _create_grenade(self):
-        acceleration = 1.5
         velocity = (10, 20)
         _type = 'grenade'
-        projectile = projectiles.Projectile(self, velocity, acceleration, _type)
+        projectile = projectiles.Projectile(self, velocity, _type)
         self.level.projectile_list.add(projectile)
