@@ -232,12 +232,8 @@ class SimpleStateMachine(object):
                 self.current_state.enter()
 
                 #Exit the method the first time a legal
-                #transition is found; return True to indicate
-                #change of state.
-                return True
-
-        # Return False to indicate no state change occurs.
-        return False
+                #transition is found.
+                return
 
     def update(self):
         """
@@ -269,6 +265,7 @@ class ConcurrentStateMachine(object):
         self.state_machine_list = state_machine_list
         self.state_to_animation_dict = state_to_animation_dict
         self.player = self.state_machine_list[0].current_state.player
+        self.current_state = tuple([sm.current_state for sm in self.state_machine_list])
 
         self.set_current_frames()
 
@@ -286,7 +283,6 @@ class ConcurrentStateMachine(object):
 
     def set_current_frames(self):
         self.current_frame_number = 0
-        self.current_state = tuple([sm.current_state for sm in self.state_machine_list])
         self.animation_frames, self.animation_period = self.state_to_animation_dict[self.current_state]
         self.frame_step = float(len(self.animation_frames[self.player.direction])) / float((self.animation_period * MAX_FRAME_RATE))
         self.current_frame = self.animation_frames[self.player.direction][self.current_frame_number]
@@ -296,21 +292,14 @@ class ConcurrentStateMachine(object):
         print self.animation_period
 
     def update(self):
-        #print 'self.current_state'
-        #print self.current_state
-        this_time = time.time()
-
-        if this_time - self.last_time > self.frequency:
-            self.last_time = this_time
-
-        was_updated_list = []
+        old_state = self.current_state
 
         for state_machine in self.state_machine_list:
-            print 'state_machine'
-            print state_machine
-            was_updated_list.append(state_machine.update())
+            state_machine.update()
 
-        if True in was_updated_list:
-            self.set_current_frames()
-        else:
+        self.current_state = tuple([sm.current_state for sm in self.state_machine_list])
+
+        if old_state == self.current_state:
             self.update_frame()
+        else:
+            self.set_current_frames()
