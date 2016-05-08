@@ -2,7 +2,7 @@ import time, os, pygame, platforms, projectiles, Queue
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
 from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD, SPEED_DIFF, SLOW_TO_STOP
 from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION, IDLE_PERIOD, RUN_PERIOD, GLIDE_PERIOD, ATTACK_PERIOD
-from constants import GLIDE_ACCELERATION, DRIFT_DECEL, SCREEN_WIDTH
+from constants import GLIDE_ACCELERATION, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL, SCREEN_WIDTH
 from constants import SCREEN_HEIGHT, DIRDICT
 from constants import RUN_FILE_STEM, JUMP_FILE_STEM, ATTACK_FILE_STEM, GLIDE_FILE_STEM, IDLE_FILE_STEM
 from constants import MAX_FRAME_RATE
@@ -18,7 +18,10 @@ class Player(pygame.sprite.Sprite):
         self.level = None
         self.direction = 'R'
         self.x_velocity = 0
+        self.base_x_velocity = 0
         self.y_velocity = 0
+        self.base_y_velocity = 0
+        self.drift_decel = DRIFT_AIR_DECEL
         self.current_platform = None
         self.vertical_event_queue = Queue.Queue()
         self.horizontal_event_queue = Queue.Queue()

@@ -120,6 +120,17 @@ class Level_01(Level):
         block.level = self
         self.platform_list.add(block)
 
+        # VERTICAL Add a custom moving platform
+        block = platforms.MovingPlatform(constants.STONE_PLATFORM_MIDDLE)
+        block.rect.x = 350
+        block.rect.y = 300
+        block.boundary_top = 100
+        block.boundary_bottom = 550
+        block.y_velocity = -2
+        block.player = self.player
+        block.level = self
+        self.platform_list.add(block)
+
 
 # Create platforms for the level
 class Level_02(Level):

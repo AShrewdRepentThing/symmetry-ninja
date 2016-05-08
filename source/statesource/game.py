@@ -3,6 +3,7 @@ from player import Player
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_SIZE, MAX_FRAME_RATE, IS_FULLSCREEN, TIMESTEP
 from constants import PLAYER_START_X, PLAYER_START_Y
 
+COUNT = 0
 
 class GameSession(object):
 
@@ -35,46 +36,6 @@ class GameSession(object):
         self.player.rect.y = PLAYER_START_Y - 500
         self.active_sprite_list.add(self.player)
 
-    def print_debug_info(self):
-        print 'x_velocity'
-        print self.player.x_velocity
-
-        print 'y_velocity'
-        print self.player.y_velocity
-
-        print 'is_gliding'
-        print self.player.is_gliding
-
-        print 'is_firing_fireball'
-        print self.player.is_firing_fireball
-
-        print 'is_firing_grenade'
-        print self.player.is_firing_grenade
-
-        print 'jump_cycle'
-        print self.player.jump_cycle
-
-        print 'is_jumping'
-        print self.player.is_jumping
-
-        print 'is_driven'
-        print self.player.is_driven
-
-        print 'is_firing_fireball'
-        print self.player.is_firing_fireball
-
-        print 'self.player.is_idle'
-        print self.player.is_idle
-
-        print 'jump count'
-        print self.player.jump_count
-
-        print 'direction'
-        print self.player.direction
-
-        print 'frame'
-        print self.player.frame
-
     def process_event(self, event):
 
         if event.type == pygame.QUIT: # If user clicked close
@@ -86,41 +47,9 @@ class GameSession(object):
         elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
             self.player.handle_input(event)
 
-            """
-            if event.key == pygame.K_LEFT:
-                self.player.go_left()
-
-            if event.key == pygame.K_RIGHT:
-                self.player.go_right()
-
-            if event.key == pygame.K_UP:
-                self.player.jump()
-
-            if event.key == pygame.K_SPACE:
-                self.player.bullet_attack()
-
-            if event.key == pygame.K_LALT:
-                self.player.grenade_attack()
-
-            if event.key == pygame.K_LSHIFT:
-                self.player.glidedown()
-
-
-        if event.type == pygame.KEYUP:
-
-            if event.key == pygame.K_LEFT and self.player.x_velocity < 0:
-                self.player.stop()
-
-            if event.key == pygame.K_RIGHT and self.player.x_velocity > 0:
-                self.player.stop()
-
-            if event.key == pygame.K_LSHIFT:
-                self.player.is_gliding = False
-            """
-
     def update_everything(self):
-        self.active_sprite_list.update()
         self.current_level.update()
+        self.active_sprite_list.update()
 
         # If the self.player gets near the right side, shift the world left (-x)
         if self.player.rect.right >= 500:
@@ -171,7 +100,6 @@ class GameSession(object):
 
             if delta_t > 0.5:
                 pass
-                #self.print_debug_info()
 
             for event in pygame.event.get(): # User did something
                 self.process_event(event)

@@ -1,8 +1,7 @@
 import pygame, time
 from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD
 from constants import SPEED_DIFF, SLOW_TO_STOP, ACCELERATION
-#from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION, IDLE_PERIOD, RUN_PERIOD, GLIDE_PERIOD, ATTACK_PERIOD
-from constants import GLIDE_ACCELERATION, DRIFT_DECEL, JUMPSPEED
+from constants import GLIDE_ACCELERATION, JUMPSPEED, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL
 from constants import DIRDICT
 from constants import MAX_FRAME_RATE
 
@@ -38,11 +37,14 @@ class PlayerState(object):
         self.player.y_velocity += self._calculate_y_acceleration()
         self.player.rect.y += int(self.player.y_velocity)
         platform = self._platform_collision()
+        self.process_y_collision(platform)
 
+    def process_y_collision(self, platform):
         if platform is None:
             self.player.vertical_event_queue.put('midair')
 
         else:
+
             if self.player.y_velocity > 0:
                 self.player.rect.bottom = platform.rect.top
                 self.player.current_platform = platform
@@ -90,6 +92,7 @@ class JumpState(PlayerState):
         self.jump_count += 1
         self.player.current_platform = None
         self.player.y_velocity = -JUMPSPEED
+        self.player.drift_decel = DRIFT_AIR_DECEL
 
     def exit(self):
         self.jump_count = 0
@@ -105,11 +108,9 @@ class FallState(PlayerState):
         PlayerState.__init__(self, player)
         self.name = 'fall'
 
-    """
-    def can_enter(self):
-        #return (self.player.current_platform is not None)
-        return (self.player.current_platform is None)
-    """
+    def enter(self):
+        self.player.current_platform = None
+        self.player.drift_decel = DRIFT_AIR_DECEL
 
 
 class GlideState(PlayerState):
@@ -120,10 +121,15 @@ class GlideState(PlayerState):
         self.name = 'glide'
 
     def _calculate_y_acceleration(self):
-        return GLIDE_ACCELERATION
+        if self.player.y_velocity >= 0:
+            return GLIDE_ACCELERATION
+        else:
+            return ACCELERATION
+
+    def enter(self):
+        self.player.drift_decel = DRIFT_AIR_DECEL
 
     def can_enter(self):
-        #return (self.player.y_velocity >= 0)
         return True
 
 
@@ -139,8 +145,14 @@ class OnPlatformState(PlayerState):
         PlayerState.update_x(self)
 
     def update_y(self):
-        self.player.rect.y += int(self.player.current_platform.y_velocity)
-        PlayerState.update_y(self)
+        self.player.rect.bottom = self.player.current_platform.rect.top
+        self.player.rect.y += 3
+        platform = self._platform_collision()
+        self.process_y_collision(platform)
+        self.player.rect.y -= 3
+
+    def enter(self):
+        self.player.drift_decel = DRIFT_GROUND_DECEL
 
     def can_enter(self):
         return (self.player.current_platform is not None)
@@ -174,7 +186,8 @@ class DriftHorizontalState(PlayerState):
         self.name = 'drift_horizontal'
 
     def update_x(self):
-        self.player.x_velocity /= DRIFT_DECEL
+        #self.player.x_velocity /= DRIFT_DECEL
+        self.player.x_velocity /= self.player.drift_decel
 
         if abs(self.player.x_velocity) < SLOW_TO_STOP:
             self.player.x_velocity = 0
@@ -286,10 +299,9 @@ class ConcurrentStateMachine(object):
         self.animation_frames, self.animation_period = self.state_to_animation_dict[self.current_state]
         self.frame_step = float(len(self.animation_frames[self.player.direction])) / float((self.animation_period * MAX_FRAME_RATE))
         self.current_frame = self.animation_frames[self.player.direction][self.current_frame_number]
+
         print 'current_state'
         print self.current_state
-        print 'self.animation_period'
-        print self.animation_period
 
     def update(self):
         old_state = self.current_state
