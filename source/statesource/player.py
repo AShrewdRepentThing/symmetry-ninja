@@ -18,9 +18,7 @@ class Player(pygame.sprite.Sprite):
         self.level = None
         self.direction = 'R'
         self.x_velocity = 0
-        #self.base_x_velocity = 0
         self.y_velocity = 0
-        #self.base_y_velocity = 0
         self.drift_decel = DRIFT_AIR_DECEL
         self.current_platform = None
         self.vertical_event_queue = Queue.Queue()
@@ -30,11 +28,8 @@ class Player(pygame.sprite.Sprite):
 
         self._create_concurrent_state_machine()
         self.image = self.csm.current_frame
-        self.current_event = None
-
         self.rect = self.image.get_rect()
-        #self.height = self.image.get_height()
-        #self.width = self.image.get_width()
+        self.current_event = None
 
         key_down_method_dct = {pygame.K_LEFT: self.go_left, pygame.K_RIGHT: self.go_right,
                                pygame.K_UP: self.jump, pygame.K_LALT: self.glide, pygame.K_DOWN: self.slide}
@@ -60,25 +55,11 @@ class Player(pygame.sprite.Sprite):
 
         initial_state = idle_horizontal_state
 
-        """
-
-        idle_transitions = [(drive_horizontal_state, 'drive_horizontal')]
-        drive_transitions = [(drift_horizontal_state, 'drift_horizontal')]
-        drift_transitions = [(drive_horizontal_state, 'drive_horizontal'),
-                             (idle_horizontal_state, 'idle_horizontal')]
-        slide_transitions = [(idle_horizontal_state, 'idle_horizontal'),
-                             (drive_horizontal_state, 'drive_horizontal')]
-
-        state_transition_dct = {idle_horizontal_state: idle_transitions, drive_horizontal_state: drive_transitions,
-                                drift_horizontal_state: drift_transitions}
-        """
-
         idle_transitions = [(drive_horizontal_state, 'drive_horizontal'), (slide_horizontal_state, 'slide_horizontal')]
-        drive_transitions = [(drift_horizontal_state, 'drift_horizontal')]
-        drift_transitions = [(drive_horizontal_state, 'drive_horizontal'),
-                             (idle_horizontal_state, 'idle_horizontal')]
+        drive_transitions = [(drift_horizontal_state, 'drift_horizontal'), (slide_horizontal_state, 'slide_horizontal')]
+        drift_transitions = [(drive_horizontal_state, 'drive_horizontal'), (idle_horizontal_state, 'idle_horizontal'),
+                             (slide_horizontal_state, 'slide_horizontal')]
         slide_transitions = [(idle_horizontal_state, 'idle_horizontal')]
-                            #(drive_horizontal_state, 'drive_horizontal')]
 
         state_transition_dct = {idle_horizontal_state: idle_transitions, drive_horizontal_state: drive_transitions,
                                 drift_horizontal_state: drift_transitions, slide_horizontal_state: slide_transitions}
