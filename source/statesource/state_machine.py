@@ -1,6 +1,6 @@
 import pygame, time
 from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD
-from constants import SPEED_DIFF, SLOW_TO_STOP, ACCELERATION
+from constants import SPEED_DIFF, SLOW_TO_STOP, ACCELERATION, SLIDE_INITIAL_VELOCITY, SLIDE_DECEL
 from constants import GLIDE_ACCELERATION, JUMPSPEED, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL
 from constants import DIRDICT
 from constants import MAX_FRAME_RATE
@@ -213,6 +213,30 @@ class IdleHorizontalState(PlayerState):
         pass
 
 
+class SlideHorizontalState(PlayerState):
+    #Player is sliding along the ground.
+
+    def __init__(self, player):
+        PlayerState.__init__(self, player)
+        self.name = 'slide_horizontal'
+
+    def enter(self):
+        if self.player.current_platform is None:
+            pass
+        else:
+            self.player.x_velocity = DIRDICT[self.player.direction] * SLIDE_INITIAL_VELOCITY
+
+    def update_x(self):
+        if self.player.current_platform is None:
+            pass
+        else:
+            self.player.x_velocity /= SLIDE_DECEL
+
+            if abs(self.player.x_velocity) < SLOW_TO_STOP:
+                self.player.x_velocity = 0
+                self.player.horizontal_event_queue.put('idle_horizontal')
+
+
 class SimpleStateMachine(object):
 
     """
@@ -303,6 +327,13 @@ class ConcurrentStateMachine(object):
         print 'current_state'
         print self.current_state
 
+    def set_current_rect(self):
+        old_rect = self.player.rect
+        ocx, ocy = old_rect.centerx, old_rect.centery
+        new_rect = self.current_frame.get_rect(center=(ocx, ocy))
+        new_rect.bottom = old_rect.bottom
+        self.player.rect = new_rect
+
     def update(self):
         old_state = self.current_state
 
@@ -315,3 +346,4 @@ class ConcurrentStateMachine(object):
             self.update_frame()
         else:
             self.set_current_frames()
+            self.set_current_rect()

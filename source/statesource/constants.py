@@ -58,10 +58,13 @@ RUN_PERIOD = 0.333
 JUMP_PERIOD = 0.5
 GLIDE_PERIOD = 5
 ATTACK_PERIOD = 8
+SLIDE_PERIOD = 2
 ACCELERATION = 1.5
 GLIDE_ACCELERATION = 0.2
 DRIFT_AIR_DECEL = 1.1
 DRIFT_GROUND_DECEL = 1.5
+SLIDE_DECEL = 1.15
+SLIDE_INITIAL_VELOCITY = 28.0
 GUN_HEIGHT = 0.0
 DIRDICT = {'L': -1.0, 'R': 1.0}
 
@@ -81,6 +84,7 @@ JUMP_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artas
 ATTACK_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/attack/Attack__00%i_%i.png')
 GLIDE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/glide/Glide_00%i_%i.png')
 IDLE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/idle/Idle__00%i.png')
+SLIDE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/slide/Slide__00%i.png')
 
 # Environment art asset locations
 

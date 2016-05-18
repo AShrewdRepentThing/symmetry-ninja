@@ -156,5 +156,3 @@ class Projectile(pygame.sprite.Sprite):
                     self.has_exploded = True
 
         self.compute_current_frame()
-
-
