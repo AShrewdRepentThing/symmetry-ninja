@@ -113,12 +113,38 @@ class Player(pygame.sprite.Sprite):
 
     """
     def redund(self):
-        glide_state = SpriteState(self.glide_frames, self.direction, GLIDE_PERIOD)
-        #attack_state = SpriteState(self.attack_frames, self.direction, ATTACK_PERIOD)
+        attack_state = SpriteState(self.attack_frames, self.direction, ATTACK_PERIOD)
     """
 
-    def handle_input(self, event):
+    def bullet_attack(self):
+        self._create_fireball()
+        self.attack_timer = 0
+        self.is_firing_fireball = True
+        self.frame = 0
 
+    def grenade_attack(self):
+        self._create_grenade()
+        self.is_firing_grenade = True
+
+    def _create_slidedust(self):
+        velocity = (0, 0)
+        _type = 'skiddust'
+        projectile = projectiles.Projectile(self, velocity, _type)
+        self.level.projectile_list.add(projectile)
+
+    def _create_fireball(self):
+        velocity = (15, 0)
+        _type = 'fireball'
+        projectile = projectiles.Projectile(self, velocity, _type)
+        self.level.projectile_list.add(projectile)
+
+    def _create_grenade(self):
+        velocity = (10, 20)
+        _type = 'grenade'
+        projectile = projectiles.Projectile(self, velocity, _type)
+        self.level.projectile_list.add(projectile)
+
+    def handle_input(self, event):
         if event.type in self.key_method_dct.keys() and event.key in self.key_method_dct[event.type].keys():
             self.key_method_dct[event.type][event.key]()
 
@@ -138,6 +164,7 @@ class Player(pygame.sprite.Sprite):
 
     def slide(self):
         print 'SLIDE'
+        self._create_slidedust()
         self.horizontal_event_queue.put('slide_horizontal')
 
     def go_left(self):

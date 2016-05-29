@@ -1,10 +1,10 @@
 import os, pygame
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
-from constants import GUN_HEIGHT, DIRDICT, FIREBALL_FILE_PATH, GRENADE_FILE_PATH
+from constants import GUN_HEIGHT, DIRDICT, FIREBALL_FILE_PATH, GRENADE_FILE_PATH, SKIDDUST_FILE_PATH
 from constants import GRENADE_EXPLOSION_STR, GRENADE_EXPLOSION_FILE_PATH, GRENADE_PERIOD
-from constants import FIREBALL_PERIOD, GRENADE_EXPLOSION_PERIOD, EXPLOSION_Y_OFFSET
+from constants import FIREBALL_PERIOD, GRENADE_EXPLOSION_PERIOD, SKIDDUST_PERIOD, EXPLOSION_Y_OFFSET
 from constants import EXPLOSION_X_OFFSET, SCREEN_WIDTH, SCREEN_HEIGHT
-from constants import GRENADE_ACCELERATION, FIREBALL_ACCELERATION
+from constants import GRENADE_ACCELERATION, FIREBALL_ACCELERATION, SKIDDUST_ACCELERATION
 
 
 class Projectile(pygame.sprite.Sprite):
@@ -43,12 +43,21 @@ class Projectile(pygame.sprite.Sprite):
             self.explosion_frames = load_animation_frames(GRENADE_EXPLOSION_FILE_PATH, image_indices=range(1, 31))
             self.acceleration = GRENADE_ACCELERATION
 
+        elif _type == 'skiddust':
+            self.animation_period = SKIDDUST_PERIOD
+            #self.skid_frames = load_animation_frames(SKIDDUST_FILE_PATH, image_indices=range(1, 31))
+            self.image_frames = load_animation_frames(SKIDDUST_FILE_PATH, image_indices=range(31))
+            self.acceleration = SKIDDUST_ACCELERATION
+
         self.image = self.image_frames[self.direction][0]
         self.height = self.image.get_height()
         self.width = self.image.get_width()
         self.rect = self.image.get_rect()
         self.rect.x = player.rect.x
-        self.rect.y = player.rect.y + player.height * GUN_HEIGHT
+        if self._type == 'skiddust':
+            self.rect.bottom = player.rect.bottom
+        else:
+            self.rect.y = player.rect.y + player.image.get_height() * GUN_HEIGHT
 
     def eliminate(self):
 
@@ -78,13 +87,23 @@ class Projectile(pygame.sprite.Sprite):
             elif self._type == 'fireball':
                 self.has_exploded = True
 
+            elif self._type == 'skiddust':
+                self.has_exploded = True
+
         else:
 
             if self.animation_timer == self.animation_period:
                 self.animation_timer = 0
+                if self._type == 'skiddust':
+                    self.is_exploding = True
             length = len(self.image_frames[self.direction])
             step = length // self.animation_period
+            #self.frame = int(step * self.animation_timer)
             self.frame = step * self.animation_timer
+            print 'stepping'
+            print step
+            print 'self.frame'
+            print self.frame
             self.image = self.image_frames[self.direction][self.frame]
             self.animation_timer += 1
 

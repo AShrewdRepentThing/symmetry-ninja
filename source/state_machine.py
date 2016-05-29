@@ -10,20 +10,20 @@ class SimpleStateMachine(object):
     def __init__(self, state_transition_dct, initial_state):
         """
         The dictionary 'state_transition_dct' has keysetthe state_names of the machine,
-        which is a list of strings. The values are lists of pairs of the form
-        (state_name, test_function), each representing a state to which the key state
-        may transition, together with a function testing whether the transition can occur.
+        which is a list of strings. The values are lists of state_names, each representing
+        a state to which the key state may transition, together with a function testing
+        whether the transition can occur.
         """
         self.current_state = initial_state
         self.state_transition_dct = state_transition_dct
 
-    def update(self, state, **kwargs):
+    def update(self, target_state):
         """
         Set the current_state equal to 'state' if this is allowed, otherwise do nothing.
         """
-        target_states = [state for state, fn in self.state_transition_dct[self.current_state]]
-        if state in target_states and fn(**kwargs):
-            self.current_state = state
+        target_states = [state for state in self.state_transition_dct[self.current_state]]
+        if target_state in target_states:
+            self.current_state = target_state
         else:
             pass
 
@@ -40,7 +40,7 @@ class ConcurrentStateMachine(object):
         state_llist = [sm.state_transition_dct.keys() for sm in self.state_machine_list]
         self.state_tuples = list(itertools.product(*state_llist))
 
-    def update(self, state):
+    def update(self, target_state):
         """
         Set the current_state equal to 'state' if this is allowed,
         otherwise do nothing.
@@ -58,8 +58,11 @@ class SpriteStateMachine(ConcurrentStateMachine):
         """
 
     def __init__(self, state_machine_list, state_to_animation_dct, direction):
-        """state_to_animation_dct has keys state_tuples and values pairs (animation_frames, period)"""
-        super(ConcurrentStateMachine, self).__init__()
+        """
+        state_to_animation_dct has keys state_tuples and
+        values pairs (animation_frames, period)
+        """
+        super(ConcurrentStateMachine, self).__init__(state_machine_list)
         self.direction = direction
         self.state_to_animation_dct = state_to_animation_dct
         self.reset_frames()

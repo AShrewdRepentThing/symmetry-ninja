@@ -35,6 +35,8 @@ EXPLOSION_Y_OFFSET = 120
 EXPLOSION_X_OFFSET = 10
 GRENADE_ACCELERATION = 1.5
 FIREBALL_ACCELERATION = 0.0
+SKIDDUST_PERIOD = 20
+SKIDDUST_ACCELERATION = 0.0
 
 
 #Player constants
@@ -76,6 +78,8 @@ GRENADE_STR = '~/Desktop/coding/games/symmetry-ninja/artassets/sprites/grenade/s
 GRENADE_FILE_PATH = os.path.expanduser(GRENADE_STR)
 GRENADE_EXPLOSION_STR = '/Users/enrightward/Desktop/coding/games/symmetry-ninja/artassets/sprites/grenade_explosion/slice_%i.png'
 GRENADE_EXPLOSION_FILE_PATH = os.path.expanduser(GRENADE_EXPLOSION_STR)
+SKIDDUST_STR = '/Users/enrightward/Desktop/coding/games/symmetry-ninja/artassets/sprites/skiddust/sprite-%i.png'
+SKIDDUST_FILE_PATH = os.path.expanduser(SKIDDUST_STR)
 
 # Player art asset locations
 
