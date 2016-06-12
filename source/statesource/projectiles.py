@@ -45,8 +45,9 @@ class Projectile(pygame.sprite.Sprite):
 
         elif _type == 'skiddust':
             self.animation_period = SKIDDUST_PERIOD
-            #self.skid_frames = load_animation_frames(SKIDDUST_FILE_PATH, image_indices=range(1, 31))
-            self.image_frames = load_animation_frames(SKIDDUST_FILE_PATH, image_indices=range(31))
+            self.image_frames = load_animation_frames(SKIDDUST_FILE_PATH, image_indices=range(30))
+            #self.image_frames = load_animation_frames(SKIDDUST_FILE_PATH, image_indices=range(20))
+            self.explosion_frames = None
             self.acceleration = SKIDDUST_ACCELERATION
 
         self.image = self.image_frames[self.direction][0]
@@ -54,8 +55,14 @@ class Projectile(pygame.sprite.Sprite):
         self.width = self.image.get_width()
         self.rect = self.image.get_rect()
         self.rect.x = player.rect.x
+
         if self._type == 'skiddust':
             self.rect.bottom = player.rect.bottom
+
+            if player.direction == 'R':
+                self.rect.right = player.rect.left
+            else:
+                self.rect.left = player.rect.right
         else:
             self.rect.y = player.rect.y + player.image.get_height() * GUN_HEIGHT
 
@@ -111,8 +118,20 @@ class Projectile(pygame.sprite.Sprite):
         block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         return block_hit_list[0] if len(block_hit_list) > 0 else None
 
+    """
     def get_x_velocity(self):
         return 0 if self.is_exploding else self.x_velocity
+    """
+
+    def get_x_velocity(self):
+        if self._type == 'skiddust':
+            x_velocity = self.player.x_velocity
+        elif self.is_exploding:
+            x_velocity = 0
+        else:
+            x_velocity = self.x_velocity
+
+        return x_velocity
 
     def update_x_coords(self):
         self.rect.x += self.get_x_velocity()
