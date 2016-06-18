@@ -38,14 +38,11 @@ FIREBALL_ACCELERATION = 0.0
 SKIDDUST_PERIOD = 20
 SKIDDUST_ACCELERATION = 0.0
 
-
 #Player constants
 
 PLAYER_START_X = 570
 PLAYER_START_Y = SCREEN_HEIGHT - 80
 
-#MIN_SPEED = 10
-#MAX_SPEED = 15
 MIN_SPEED = 4
 MAX_SPEED = 8
 SPEED_DIFF = MAX_SPEED - MIN_SPEED
@@ -54,12 +51,11 @@ SLOW_TO_STOP = 1.0
 JUMPSPEED = 25
 JUMPCOUNT = 2
 IDLE_PERIOD = 20
-#RUN_PERIOD = 5
 RUN_PERIOD = 0.333
-#JUMP_PERIOD = 2
 JUMP_PERIOD = 0.5
 GLIDE_PERIOD = 5
-ATTACK_PERIOD = 8
+FIREBALL_ATTACK_PERIOD = 0.3
+GRENADE_ATTACK_PERIOD = 8
 SLIDE_PERIOD = 2
 ACCELERATION = 1.5
 GLIDE_ACCELERATION = 0.2
@@ -78,20 +74,21 @@ GRENADE_STR = '~/Desktop/coding/games/symmetry-ninja/artassets/sprites/grenade/s
 GRENADE_FILE_PATH = os.path.expanduser(GRENADE_STR)
 GRENADE_EXPLOSION_STR = '/Users/enrightward/Desktop/coding/games/symmetry-ninja/artassets/sprites/grenade_explosion/slice_%i.png'
 GRENADE_EXPLOSION_FILE_PATH = os.path.expanduser(GRENADE_EXPLOSION_STR)
-SKIDDUST_STR = '/Users/enrightward/Desktop/coding/games/symmetry-ninja/artassets/sprites/skiddust/sprite-%i.png'
+SKIDDUST_STR = '/Users/enrightward/Desktop/coding/games/symmetry-ninja/artassets/sprites/skiddust2/out/interpolate/resize/dust_%i.png'
 SKIDDUST_FILE_PATH = os.path.expanduser(SKIDDUST_STR)
 
 # Player art asset locations
 
 RUN_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/run/Run__00%i_%i.png')
 JUMP_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/jump/Jump__00%i_%i.png')
-ATTACK_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/attack/Attack__00%i_%i.png')
+#FIREBALL_ATTACK_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/swordswing/scaled/Attack__00%i_%i.png')
+FIREBALL_ATTACK_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/swordswing/crop/Attack__00%i_%i.png')
 GLIDE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/glide/Glide_00%i_%i.png')
 IDLE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/idle/Idle__00%i.png')
 SLIDE_FILE_STEM = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/ninja/sixtyfps/slide/Slide__00%i.png')
 
 # Environment art asset locations
 
+BACKGROUND_ANIMATION_PERIOD = 5
 TILES_SS_PATH = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/tilesets/basic_tiles.png')
 ANIMATED_BACKGROUND_FILEPATH = os.path.expanduser('~/Desktop/coding/games/symmetry-ninja/artassets/sprites/waterfall/png/frame_%i.png')
-BACKGROUND_ANIMATION_PERIOD = 5

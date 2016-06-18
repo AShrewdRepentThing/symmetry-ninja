@@ -1,20 +1,21 @@
 import time, os, pygame, platforms, projectiles, Queue
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
 from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD, SPEED_DIFF, SLOW_TO_STOP
-from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION, IDLE_PERIOD, RUN_PERIOD, GLIDE_PERIOD, ATTACK_PERIOD, SLIDE_PERIOD
+from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION
+from constants import IDLE_PERIOD, RUN_PERIOD, GLIDE_PERIOD, GRENADE_ATTACK_PERIOD, SLIDE_PERIOD, FIREBALL_ATTACK_PERIOD
 from constants import GLIDE_ACCELERATION, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL, SCREEN_WIDTH
 from constants import SCREEN_HEIGHT, DIRDICT
-from constants import RUN_FILE_STEM, JUMP_FILE_STEM, ATTACK_FILE_STEM, GLIDE_FILE_STEM, IDLE_FILE_STEM, SLIDE_FILE_STEM
+from constants import RUN_FILE_STEM, JUMP_FILE_STEM, FIREBALL_ATTACK_FILE_STEM, GLIDE_FILE_STEM, IDLE_FILE_STEM, SLIDE_FILE_STEM
 from constants import MAX_FRAME_RATE
 from state_machine import SimpleStateMachine, ConcurrentStateMachine, PlayerState, DriveHorizontalState
 from state_machine import JumpState, IdleHorizontalState, OnPlatformState, DriftHorizontalState, FallState, GlideState, SlideHorizontalState
+from state_machine import IdleAttackState, FireballAttackState
 
 
 class Player(pygame.sprite.Sprite):
 
     def __init__(self):
         super(Player, self).__init__()
-
         self.level = None
         self.direction = 'R'
         self.x_velocity = 0
@@ -23,25 +24,28 @@ class Player(pygame.sprite.Sprite):
         self.current_platform = None
         self.vertical_event_queue = Queue.Queue()
         self.horizontal_event_queue = Queue.Queue()
-
+        self.attack_event_queue = Queue.Queue()
         self._load_animation_frames()
-
         self._create_concurrent_state_machine()
         self.image = self.csm.current_frame
         self.rect = self.image.get_rect()
         self.current_event = None
 
         key_down_method_dct = {pygame.K_LEFT: self.go_left, pygame.K_RIGHT: self.go_right,
-                               pygame.K_UP: self.jump, pygame.K_LALT: self.glide, pygame.K_DOWN: self.slide}
+                               pygame.K_UP: self.jump, pygame.K_LALT: self.glide, pygame.K_DOWN: self.slide,
+                               pygame.K_SPACE: self.fireball_attack}
+
         key_up_method_dct = {pygame.K_LEFT: self.stop_horizontal, pygame.K_RIGHT: self.stop_horizontal,
-                             pygame.K_UP: self.stop_vertical, pygame.K_LALT: self.stop_glide, pygame.K_DOWN: self.stop_slide}
+                             pygame.K_UP: self.stop_vertical, pygame.K_LALT: self.stop_glide, pygame.K_DOWN: self.stop_slide,
+                             pygame.K_SPACE: self.stop_fireball_attack}
+
         self.key_method_dct = {pygame.KEYDOWN: key_down_method_dct, pygame.KEYUP: key_up_method_dct}
 
     def _load_animation_frames(self):
         keyframe_range, tween_range = range(10), range(1, 6)
         self.run_frames = load_animation_frames_key_tween(RUN_FILE_STEM, keyframe_range, tween_range)
         self.jump_frames = load_animation_frames_key_tween(JUMP_FILE_STEM, keyframe_range, tween_range)
-        self.attack_frames = load_animation_frames_key_tween(ATTACK_FILE_STEM, keyframe_range, tween_range)
+        self.fireball_attack_frames = load_animation_frames_key_tween(FIREBALL_ATTACK_FILE_STEM, keyframe_range, tween_range)
         self.glide_frames = load_animation_frames_key_tween(GLIDE_FILE_STEM, keyframe_range, tween_range)
         image_indices = range(10)
         self.idle_frames = load_animation_frames(IDLE_FILE_STEM, image_indices)
@@ -85,9 +89,27 @@ class Player(pygame.sprite.Sprite):
         self.vertical_states = [on_platform_state, jump_state, fall_state, glide_state]
         self.vertical_state_machine = SimpleStateMachine(state_transition_dct, initial_state, self.vertical_event_queue)
 
+    def _create_attack_state_machine(self):
+        idle_attack_state = IdleAttackState(self)
+        fireball_attack_state = FireballAttackState(self)
+
+        initial_state = idle_attack_state
+        idle_attack_transitions = [(fireball_attack_state, 'fireball_attack')]
+        fireball_attack_transitions = [(idle_attack_state, 'idle_attack')]
+
+        state_transition_dct = {idle_attack_state: idle_attack_transitions,
+                                fireball_attack_state: fireball_attack_transitions}
+
+        self.attack_states = [idle_attack_state, fireball_attack_state]
+        self.attack_state_machine = SimpleStateMachine(state_transition_dct,
+                                                       initial_state, self.attack_event_queue)
+
+    """
     def _create_concurrent_state_machine(self):
         self._create_horizontal_state_machine()
         self._create_vertical_state_machine()
+        self._create_attack_state_machine()
+
         state_machine_list = [self.horizontal_state_machine, self.vertical_state_machine]
         idle_horizontal_state, drive_horizontal_state, drift_horizontal_state, slide_horizontal_state = self.horizontal_states
         on_platform_state, jump_state, fall_state, glide_state = self.vertical_states
@@ -110,11 +132,51 @@ class Player(pygame.sprite.Sprite):
 
         state_machine_list = [self.horizontal_state_machine, self.vertical_state_machine]
         self.csm = ConcurrentStateMachine(state_machine_list, state_to_animation_dict)
+    """
 
-    """
-    def redund(self):
-        attack_state = SpriteState(self.attack_frames, self.direction, ATTACK_PERIOD)
-    """
+    def _create_concurrent_state_machine(self):
+        self._create_horizontal_state_machine()
+        self._create_vertical_state_machine()
+        self._create_attack_state_machine()
+
+        state_machine_list = [self.horizontal_state_machine, self.vertical_state_machine, self.vertical_state_machine]
+        idle_horizontal_state, drive_horizontal_state, drift_horizontal_state, slide_horizontal_state = self.horizontal_states
+        on_platform_state, jump_state, fall_state, glide_state = self.vertical_states
+        idle_attack_state, fireball_attack_state = self.attack_states
+
+        state_to_animation_dict = dict()
+
+        for hstate in self.horizontal_states:
+            state_to_animation_dict[(hstate, jump_state, idle_attack_state)] = (self.jump_frames, JUMP_PERIOD)
+            state_to_animation_dict[(hstate, glide_state, idle_attack_state)] = (self.glide_frames, GLIDE_PERIOD)
+            state_to_animation_dict[(hstate, jump_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+            state_to_animation_dict[(hstate, glide_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+
+        state_to_animation_dict[(idle_horizontal_state, on_platform_state, idle_attack_state)] = (self.idle_frames, IDLE_PERIOD)
+        state_to_animation_dict[(drive_horizontal_state, on_platform_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
+        state_to_animation_dict[(drift_horizontal_state, on_platform_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
+        state_to_animation_dict[(slide_horizontal_state, on_platform_state, idle_attack_state)] = (self.slide_frames, SLIDE_PERIOD)
+
+        state_to_animation_dict[(idle_horizontal_state, on_platform_state,  fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+        state_to_animation_dict[(drive_horizontal_state, on_platform_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+        state_to_animation_dict[(drift_horizontal_state, on_platform_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+        state_to_animation_dict[(slide_horizontal_state, on_platform_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+
+        state_to_animation_dict[(idle_horizontal_state, fall_state, idle_attack_state)] = (self.idle_frames, IDLE_PERIOD)
+        state_to_animation_dict[(drive_horizontal_state, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
+        state_to_animation_dict[(drift_horizontal_state, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
+        state_to_animation_dict[(slide_horizontal_state, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
+
+        state_to_animation_dict[(idle_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+        state_to_animation_dict[(drive_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+        state_to_animation_dict[(drift_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+        state_to_animation_dict[(slide_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+
+        state_machine_list = [self.horizontal_state_machine,
+                              self.vertical_state_machine,
+                              self.attack_state_machine]
+
+        self.csm = ConcurrentStateMachine(state_machine_list, state_to_animation_dict)
 
     def bullet_attack(self):
         self._create_fireball()
@@ -147,7 +209,6 @@ class Player(pygame.sprite.Sprite):
     def handle_input(self, event):
         if event.type in self.key_method_dct.keys() and event.key in self.key_method_dct[event.type].keys():
             self.key_method_dct[event.type][event.key]()
-
         else:
             pass
 
@@ -166,6 +227,11 @@ class Player(pygame.sprite.Sprite):
         print 'SLIDE'
         self._create_slidedust()
         self.horizontal_event_queue.put('slide_horizontal')
+
+    def fireball_attack(self):
+        print 'FIREBALL'
+        self._create_fireball()
+        self.attack_event_queue.put('fireball_attack')
 
     def go_left(self):
         print 'GO LEFT'
@@ -189,4 +255,7 @@ class Player(pygame.sprite.Sprite):
         self.vertical_event_queue.put('stop_glide')
 
     def stop_slide(self):
+        pass
+
+    def stop_fireball_attack(self):
         pass

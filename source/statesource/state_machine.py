@@ -4,6 +4,7 @@ from constants import SPEED_DIFF, SLOW_TO_STOP, ACCELERATION, SLIDE_INITIAL_VELO
 from constants import GLIDE_ACCELERATION, JUMPSPEED, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL
 from constants import DIRDICT
 from constants import MAX_FRAME_RATE
+from constants import FIREBALL_ATTACK_PERIOD
 
 
 class PlayerState(object):
@@ -235,6 +236,39 @@ class SlideHorizontalState(PlayerState):
             if abs(self.player.x_velocity) < SLOW_TO_STOP:
                 self.player.x_velocity = 0
                 self.player.horizontal_event_queue.put('idle_horizontal')
+
+
+class IdleAttackState(PlayerState):
+    #Player was directed left or right by user, now stopped drifting.
+
+    def __init__(self, player):
+        PlayerState.__init__(self, player)
+        self.name = 'idle_attack'
+
+    def update_x(self):
+        pass
+
+    def update_y(self):
+        pass
+
+
+class FireballAttackState(PlayerState):
+
+    def __init__(self, player):
+        PlayerState.__init__(self, player)
+        self.name = 'fireball_attack'
+
+    def enter(self):
+        self.counter = 0
+        self.max_out = len(self.player.fireball_attack_frames['L']) * FIREBALL_ATTACK_PERIOD
+
+    def update_x(self):
+        self.counter += 1
+        if self.counter >= self.max_out:
+            self.player.attack_event_queue.put('idle_attack')
+
+    def update_y(self):
+        pass
 
 
 class SimpleStateMachine(object):
