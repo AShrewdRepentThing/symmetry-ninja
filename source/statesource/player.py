@@ -2,10 +2,11 @@ import time, os, pygame, platforms, projectiles, Queue
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
 from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD, SPEED_DIFF, SLOW_TO_STOP
 from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION
-from constants import IDLE_PERIOD, RUN_PERIOD, GLIDE_PERIOD, GRENADE_ATTACK_PERIOD, SLIDE_PERIOD, FIREBALL_ATTACK_PERIOD
+from constants import IDLE_PERIOD, SLIDE_PERIOD, FIREBALL_ATTACK_PERIOD, JUMP_FIREBALL_ATTACK_PERIOD
+from constants import RUN_PERIOD, GLIDE_PERIOD, GRENADE_ATTACK_PERIOD, JUMP_FIREBALL_ATTACK_PERIOD
 from constants import GLIDE_ACCELERATION, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL, SCREEN_WIDTH
 from constants import SCREEN_HEIGHT, DIRDICT
-from constants import RUN_FILE_STEM, JUMP_FILE_STEM, FIREBALL_ATTACK_FILE_STEM, GLIDE_FILE_STEM
+from constants import RUN_FILE_STEM, JUMP_FILE_STEM, FIREBALL_ATTACK_FILE_STEM, JUMP_FIREBALL_ATTACK_FILE_STEM, GLIDE_FILE_STEM
 from constants import IDLE_FILE_STEM, SLIDE_FILE_STEM, GRENADE_ATTACK_FILE_STEM
 from constants import MAX_FRAME_RATE
 from state_machine import SimpleStateMachine, ConcurrentStateMachine, PlayerState, DriveHorizontalState
@@ -47,6 +48,7 @@ class Player(pygame.sprite.Sprite):
         self.run_frames = load_animation_frames_key_tween(RUN_FILE_STEM, keyframe_range, tween_range)
         self.jump_frames = load_animation_frames_key_tween(JUMP_FILE_STEM, keyframe_range, tween_range)
         self.fireball_attack_frames = load_animation_frames_key_tween(FIREBALL_ATTACK_FILE_STEM, keyframe_range, tween_range)
+        self.jump_fireball_attack_frames = load_animation_frames_key_tween(JUMP_FIREBALL_ATTACK_FILE_STEM, keyframe_range, tween_range)
         self.grenade_attack_frames = load_animation_frames_key_tween(GRENADE_ATTACK_FILE_STEM, keyframe_range, tween_range)
         self.glide_frames = load_animation_frames_key_tween(GLIDE_FILE_STEM, keyframe_range, tween_range)
         image_indices = range(10)
@@ -124,7 +126,9 @@ class Player(pygame.sprite.Sprite):
         for hstate in self.horizontal_states:
             state_to_animation_dict[(hstate, jump_state, idle_attack_state)] = (self.jump_frames, JUMP_PERIOD)
             state_to_animation_dict[(hstate, glide_state, idle_attack_state)] = (self.glide_frames, GLIDE_PERIOD)
-            state_to_animation_dict[(hstate, jump_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+            #state_to_animation_dict[(hstate, jump_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+            state_to_animation_dict[(hstate, jump_state, fireball_attack_state)] = (self.jump_fireball_attack_frames, JUMP_FIREBALL_ATTACK_PERIOD)
+
             state_to_animation_dict[(hstate, glide_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
             state_to_animation_dict[(hstate, on_platform_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
             state_to_animation_dict[(hstate, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
