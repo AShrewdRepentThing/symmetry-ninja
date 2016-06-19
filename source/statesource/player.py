@@ -5,11 +5,12 @@ from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION
 from constants import IDLE_PERIOD, RUN_PERIOD, GLIDE_PERIOD, GRENADE_ATTACK_PERIOD, SLIDE_PERIOD, FIREBALL_ATTACK_PERIOD
 from constants import GLIDE_ACCELERATION, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL, SCREEN_WIDTH
 from constants import SCREEN_HEIGHT, DIRDICT
-from constants import RUN_FILE_STEM, JUMP_FILE_STEM, FIREBALL_ATTACK_FILE_STEM, GLIDE_FILE_STEM, IDLE_FILE_STEM, SLIDE_FILE_STEM
+from constants import RUN_FILE_STEM, JUMP_FILE_STEM, FIREBALL_ATTACK_FILE_STEM, GLIDE_FILE_STEM
+from constants import IDLE_FILE_STEM, SLIDE_FILE_STEM, GRENADE_ATTACK_FILE_STEM
 from constants import MAX_FRAME_RATE
 from state_machine import SimpleStateMachine, ConcurrentStateMachine, PlayerState, DriveHorizontalState
 from state_machine import JumpState, IdleHorizontalState, OnPlatformState, DriftHorizontalState, FallState, GlideState, SlideHorizontalState
-from state_machine import IdleAttackState, FireballAttackState
+from state_machine import IdleAttackState, FireballAttackState, GrenadeAttackState
 
 
 class Player(pygame.sprite.Sprite):
@@ -33,11 +34,11 @@ class Player(pygame.sprite.Sprite):
 
         key_down_method_dct = {pygame.K_LEFT: self.go_left, pygame.K_RIGHT: self.go_right,
                                pygame.K_UP: self.jump, pygame.K_LALT: self.glide, pygame.K_DOWN: self.slide,
-                               pygame.K_SPACE: self.fireball_attack}
+                               pygame.K_SPACE: self.fireball_attack, pygame.K_LSHIFT: self.grenade_attack}
 
         key_up_method_dct = {pygame.K_LEFT: self.stop_horizontal, pygame.K_RIGHT: self.stop_horizontal,
                              pygame.K_UP: self.stop_vertical, pygame.K_LALT: self.stop_glide, pygame.K_DOWN: self.stop_slide,
-                             pygame.K_SPACE: self.stop_fireball_attack}
+                             pygame.K_SPACE: self.stop_fireball_attack, pygame.K_LSHIFT: self.stop_grenade_attack}
 
         self.key_method_dct = {pygame.KEYDOWN: key_down_method_dct, pygame.KEYUP: key_up_method_dct}
 
@@ -46,6 +47,7 @@ class Player(pygame.sprite.Sprite):
         self.run_frames = load_animation_frames_key_tween(RUN_FILE_STEM, keyframe_range, tween_range)
         self.jump_frames = load_animation_frames_key_tween(JUMP_FILE_STEM, keyframe_range, tween_range)
         self.fireball_attack_frames = load_animation_frames_key_tween(FIREBALL_ATTACK_FILE_STEM, keyframe_range, tween_range)
+        self.grenade_attack_frames = load_animation_frames_key_tween(GRENADE_ATTACK_FILE_STEM, keyframe_range, tween_range)
         self.glide_frames = load_animation_frames_key_tween(GLIDE_FILE_STEM, keyframe_range, tween_range)
         image_indices = range(10)
         self.idle_frames = load_animation_frames(IDLE_FILE_STEM, image_indices)
@@ -92,47 +94,20 @@ class Player(pygame.sprite.Sprite):
     def _create_attack_state_machine(self):
         idle_attack_state = IdleAttackState(self)
         fireball_attack_state = FireballAttackState(self)
+        grenade_attack_state = GrenadeAttackState(self)
 
         initial_state = idle_attack_state
-        idle_attack_transitions = [(fireball_attack_state, 'fireball_attack')]
+        idle_attack_transitions = [(fireball_attack_state, 'fireball_attack'), (grenade_attack_state, 'grenade_attack')]
         fireball_attack_transitions = [(idle_attack_state, 'idle_attack')]
+        grenade_attack_transitions = [(idle_attack_state, 'idle_attack')]
 
         state_transition_dct = {idle_attack_state: idle_attack_transitions,
-                                fireball_attack_state: fireball_attack_transitions}
+                                fireball_attack_state: fireball_attack_transitions,
+                                grenade_attack_state: grenade_attack_transitions}
 
-        self.attack_states = [idle_attack_state, fireball_attack_state]
+        self.attack_states = [idle_attack_state, fireball_attack_state, grenade_attack_state]
         self.attack_state_machine = SimpleStateMachine(state_transition_dct,
                                                        initial_state, self.attack_event_queue)
-
-    """
-    def _create_concurrent_state_machine(self):
-        self._create_horizontal_state_machine()
-        self._create_vertical_state_machine()
-        self._create_attack_state_machine()
-
-        state_machine_list = [self.horizontal_state_machine, self.vertical_state_machine]
-        idle_horizontal_state, drive_horizontal_state, drift_horizontal_state, slide_horizontal_state = self.horizontal_states
-        on_platform_state, jump_state, fall_state, glide_state = self.vertical_states
-
-        state_to_animation_dict = dict()
-
-        for hstate in self.horizontal_states:
-            state_to_animation_dict[(hstate, jump_state)] = (self.jump_frames, JUMP_PERIOD)
-            state_to_animation_dict[(hstate,  glide_state)] = (self.glide_frames, GLIDE_PERIOD)
-
-        state_to_animation_dict[(idle_horizontal_state, on_platform_state)] = (self.idle_frames, IDLE_PERIOD)
-        state_to_animation_dict[(drive_horizontal_state, on_platform_state)] = (self.run_frames, RUN_PERIOD)
-        state_to_animation_dict[(drift_horizontal_state, on_platform_state)] = (self.run_frames, RUN_PERIOD)
-        state_to_animation_dict[(slide_horizontal_state, on_platform_state)] = (self.slide_frames, SLIDE_PERIOD)
-
-        state_to_animation_dict[(idle_horizontal_state,  fall_state)] = (self.idle_frames, IDLE_PERIOD)
-        state_to_animation_dict[(drive_horizontal_state, fall_state)] = (self.run_frames, RUN_PERIOD)
-        state_to_animation_dict[(drift_horizontal_state, fall_state)] = (self.run_frames, RUN_PERIOD)
-        state_to_animation_dict[(slide_horizontal_state, fall_state)] = (self.run_frames, RUN_PERIOD)
-
-        state_machine_list = [self.horizontal_state_machine, self.vertical_state_machine]
-        self.csm = ConcurrentStateMachine(state_machine_list, state_to_animation_dict)
-    """
 
     def _create_concurrent_state_machine(self):
         self._create_horizontal_state_machine()
@@ -142,7 +117,7 @@ class Player(pygame.sprite.Sprite):
         state_machine_list = [self.horizontal_state_machine, self.vertical_state_machine, self.vertical_state_machine]
         idle_horizontal_state, drive_horizontal_state, drift_horizontal_state, slide_horizontal_state = self.horizontal_states
         on_platform_state, jump_state, fall_state, glide_state = self.vertical_states
-        idle_attack_state, fireball_attack_state = self.attack_states
+        idle_attack_state, fireball_attack_state, grenade_attack_state = self.attack_states
 
         state_to_animation_dict = dict()
 
@@ -151,32 +126,25 @@ class Player(pygame.sprite.Sprite):
             state_to_animation_dict[(hstate, glide_state, idle_attack_state)] = (self.glide_frames, GLIDE_PERIOD)
             state_to_animation_dict[(hstate, jump_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
             state_to_animation_dict[(hstate, glide_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+            state_to_animation_dict[(hstate, on_platform_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
+            state_to_animation_dict[(hstate, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
+
+            state_to_animation_dict[(hstate, on_platform_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+            state_to_animation_dict[(hstate, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
+
+            state_to_animation_dict[(hstate, on_platform_state, grenade_attack_state)] = (self.grenade_attack_frames, GRENADE_ATTACK_PERIOD)
+            state_to_animation_dict[(hstate, fall_state, grenade_attack_state)] = (self.grenade_attack_frames, GRENADE_ATTACK_PERIOD)
 
         state_to_animation_dict[(idle_horizontal_state, on_platform_state, idle_attack_state)] = (self.idle_frames, IDLE_PERIOD)
-        state_to_animation_dict[(drive_horizontal_state, on_platform_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
-        state_to_animation_dict[(drift_horizontal_state, on_platform_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
         state_to_animation_dict[(slide_horizontal_state, on_platform_state, idle_attack_state)] = (self.slide_frames, SLIDE_PERIOD)
-
-        state_to_animation_dict[(idle_horizontal_state, on_platform_state,  fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
-        state_to_animation_dict[(drive_horizontal_state, on_platform_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
-        state_to_animation_dict[(drift_horizontal_state, on_platform_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
-        state_to_animation_dict[(slide_horizontal_state, on_platform_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
-
         state_to_animation_dict[(idle_horizontal_state, fall_state, idle_attack_state)] = (self.idle_frames, IDLE_PERIOD)
-        state_to_animation_dict[(drive_horizontal_state, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
-        state_to_animation_dict[(drift_horizontal_state, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
-        state_to_animation_dict[(slide_horizontal_state, fall_state, idle_attack_state)] = (self.run_frames, RUN_PERIOD)
-
-        state_to_animation_dict[(idle_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
-        state_to_animation_dict[(drive_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
-        state_to_animation_dict[(drift_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
-        state_to_animation_dict[(slide_horizontal_state, fall_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
 
         state_machine_list = [self.horizontal_state_machine,
                               self.vertical_state_machine,
                               self.attack_state_machine]
 
-        self.csm = ConcurrentStateMachine(state_machine_list, state_to_animation_dict)
+        self.csm = ConcurrentStateMachine(state_machine_list,
+                                          state_to_animation_dict)
 
     def bullet_attack(self):
         self._create_fireball()
@@ -233,6 +201,11 @@ class Player(pygame.sprite.Sprite):
         self._create_fireball()
         self.attack_event_queue.put('fireball_attack')
 
+    def grenade_attack(self):
+        print 'GRENADE'
+        self._create_grenade()
+        self.attack_event_queue.put('grenade_attack')
+
     def go_left(self):
         print 'GO LEFT'
         self.direction = 'L'
@@ -258,4 +231,7 @@ class Player(pygame.sprite.Sprite):
         pass
 
     def stop_fireball_attack(self):
+        pass
+
+    def stop_grenade_attack(self):
         pass

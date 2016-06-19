@@ -4,7 +4,7 @@ from constants import SPEED_DIFF, SLOW_TO_STOP, ACCELERATION, SLIDE_INITIAL_VELO
 from constants import GLIDE_ACCELERATION, JUMPSPEED, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL
 from constants import DIRDICT
 from constants import MAX_FRAME_RATE
-from constants import FIREBALL_ATTACK_PERIOD
+from constants import FIREBALL_ATTACK_PERIOD, GRENADE_ATTACK_PERIOD
 
 
 class PlayerState(object):
@@ -260,7 +260,28 @@ class FireballAttackState(PlayerState):
 
     def enter(self):
         self.counter = 0
-        self.max_out = len(self.player.fireball_attack_frames['L']) * FIREBALL_ATTACK_PERIOD
+        length = len(self.player.fireball_attack_frames['L'])
+        self.max_out = length * FIREBALL_ATTACK_PERIOD
+
+    def update_x(self):
+        self.counter += 1
+        if self.counter >= self.max_out:
+            self.player.attack_event_queue.put('idle_attack')
+
+    def update_y(self):
+        pass
+
+
+class GrenadeAttackState(PlayerState):
+
+    def __init__(self, player):
+        PlayerState.__init__(self, player)
+        self.name = 'grenade_attack'
+
+    def enter(self):
+        self.counter = 0
+        length = len(self.player.fireball_attack_frames['L'])
+        self.max_out = length * GRENADE_ATTACK_PERIOD
 
     def update_x(self):
         self.counter += 1
