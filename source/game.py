@@ -1,14 +1,14 @@
-import os, pygame, time, levels
+import logging, os, pygame, time, levels
 from player import Player
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_SIZE, MAX_FRAME_RATE, IS_FULLSCREEN, TIMESTEP
-from constants import PLAYER_START_X, PLAYER_START_Y
+from constants import PLAYER_START_X, PLAYER_START_Y, LOG_FILENAME
 
 COUNT = 0
+logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
 
 class GameSession(object):
 
     def __init__(self):
-        #pygame.init()
 
         # Set the height and width of the screen
         if IS_FULLSCREEN:
@@ -93,13 +93,9 @@ class GameSession(object):
         # Used to manage how fast the screen updates
         last_time = time.time()
 
-        # -------- Main Program Loop -----------
         while not self.done:
             this_time = time.time()
             delta_t = this_time - last_time
-
-            if delta_t > 0.5:
-                pass
 
             for event in pygame.event.get(): # User did something
                 self.process_event(event)
@@ -108,6 +104,13 @@ class GameSession(object):
                 last_time = this_time
                 self.update_everything()
                 self.draw_everything()
+                time_elapsed = float(pygame.time.get_ticks()) / 1000.0
+                logging.debug('Seconds elapsed: %s' % str(time_elapsed))
+                logging.debug('Current platform: %s' % self.player.current_platform)
+                logging.debug('Player x-position: %s' % str(self.player.rect.x))
+                logging.debug('Player y-position: %s' % str(self.player.rect.y))
+                logging.debug('Player x-velocity: %s' % str(self.player.x_velocity))
+                logging.debug('Player y-velocity: %s' % str(self.player.y_velocity))
 
         #End when self.done = True
         pygame.quit()
@@ -120,4 +123,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

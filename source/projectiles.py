@@ -1,9 +1,9 @@
-import os, pygame
+import logging, os, pygame
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
 from constants import GUN_HEIGHT, DIRDICT, FIREBALL_FILE_PATH, GRENADE_FILE_PATH, SKIDDUST_FILE_PATH
 from constants import GRENADE_EXPLOSION_STR, GRENADE_EXPLOSION_FILE_PATH, GRENADE_PERIOD
 from constants import FIREBALL_PERIOD, GRENADE_EXPLOSION_PERIOD, SKIDDUST_PERIOD, EXPLOSION_Y_OFFSET
-from constants import EXPLOSION_X_OFFSET, SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import EXPLOSION_X_OFFSET, SCREEN_WIDTH, SCREEN_HEIGHT, LOG_FILENAME
 from constants import GRENADE_ACCELERATION, FIREBALL_ACCELERATION, SKIDDUST_ACCELERATION
 
 
@@ -105,23 +105,13 @@ class Projectile(pygame.sprite.Sprite):
                     self.is_exploding = True
             length = len(self.image_frames[self.direction])
             step = length // self.animation_period
-            #self.frame = int(step * self.animation_timer)
             self.frame = step * self.animation_timer
-            print 'stepping'
-            print step
-            print 'self.frame'
-            print self.frame
             self.image = self.image_frames[self.direction][self.frame]
             self.animation_timer += 1
 
     def _struck_platform(self):
         block_hit_list = pygame.sprite.spritecollide(self, self.level.platform_list, False)
         return block_hit_list[0] if len(block_hit_list) > 0 else None
-
-    """
-    def get_x_velocity(self):
-        return 0 if self.is_exploding else self.x_velocity
-    """
 
     def get_x_velocity(self):
         if self._type == 'skiddust':

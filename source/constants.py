@@ -4,6 +4,11 @@ IS_FULLSCREEN = False
 MAX_FRAME_RATE = 60
 TIMESTEP = 1.0/40.0
 
+# Name of log file
+
+#LOG_FILENAME = '~/Desktop/coding/games/symmetry-ninja/source/logfile.txt'
+LOG_FILENAME = 'logfile.txt'
+
 # Colors
 
 BLACK    = (   0,   0,   0)

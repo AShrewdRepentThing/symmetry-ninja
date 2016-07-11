@@ -1,8 +1,8 @@
-import pygame, time
+import logging, pygame, time
 from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD
 from constants import SPEED_DIFF, SLOW_TO_STOP, ACCELERATION, SLIDE_INITIAL_VELOCITY, SLIDE_DECEL
 from constants import GLIDE_ACCELERATION, JUMPSPEED, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL
-from constants import DIRDICT
+from constants import DIRDICT, LOG_FILENAME
 from constants import MAX_FRAME_RATE
 from constants import FIREBALL_ATTACK_PERIOD, GRENADE_ATTACK_PERIOD
 
@@ -227,6 +227,9 @@ class SlideHorizontalState(PlayerState):
         else:
             self.player.x_velocity = DIRDICT[self.player.direction] * SLIDE_INITIAL_VELOCITY
 
+    def exit(self):
+        self.player.x_velocity = 0
+
     def update_x(self):
         if self.player.current_platform is None:
             pass
@@ -378,9 +381,7 @@ class ConcurrentStateMachine(object):
         self.animation_frames, self.animation_period = self.state_to_animation_dict[self.current_state]
         self.frame_step = float(len(self.animation_frames[self.player.direction])) / float((self.animation_period * MAX_FRAME_RATE))
         self.current_frame = self.animation_frames[self.player.direction][self.current_frame_number]
-
-        print 'current_state'
-        print self.current_state
+        logging.debug('\n\nCURRENT_STATE: %s' % str(self.current_state))
 
     def set_current_rect(self):
         old_rect = self.player.rect

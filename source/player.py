@@ -1,4 +1,4 @@
-import time, os, pygame, platforms, projectiles, Queue
+import logging, time, os, pygame, platforms, projectiles, Queue
 from load_animation_frames import load_animation_frames, load_animation_frames_key_tween
 from constants import MIN_SPEED, MAX_SPEED, MAX_FRAME_RATE, ACCELERATION_PERIOD, SPEED_DIFF, SLOW_TO_STOP
 from constants import JUMPSPEED, JUMPCOUNT, JUMP_PERIOD, ACCELERATION
@@ -8,7 +8,7 @@ from constants import GLIDE_ACCELERATION, DRIFT_AIR_DECEL, DRIFT_GROUND_DECEL, S
 from constants import SCREEN_HEIGHT, DIRDICT
 from constants import RUN_FILE_STEM, JUMP_FILE_STEM, FIREBALL_ATTACK_FILE_STEM, JUMP_FIREBALL_ATTACK_FILE_STEM, GLIDE_FILE_STEM
 from constants import IDLE_FILE_STEM, SLIDE_FILE_STEM, GRENADE_ATTACK_FILE_STEM
-from constants import MAX_FRAME_RATE
+from constants import MAX_FRAME_RATE, LOG_FILENAME
 from state_machine import SimpleStateMachine, ConcurrentStateMachine, PlayerState, DriveHorizontalState
 from state_machine import JumpState, IdleHorizontalState, OnPlatformState, DriftHorizontalState, FallState, GlideState, SlideHorizontalState
 from state_machine import IdleAttackState, FireballAttackState, GrenadeAttackState
@@ -126,7 +126,6 @@ class Player(pygame.sprite.Sprite):
         for hstate in self.horizontal_states:
             state_to_animation_dict[(hstate, jump_state, idle_attack_state)] = (self.jump_frames, JUMP_PERIOD)
             state_to_animation_dict[(hstate, glide_state, idle_attack_state)] = (self.glide_frames, GLIDE_PERIOD)
-            #state_to_animation_dict[(hstate, jump_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
             state_to_animation_dict[(hstate, jump_state, fireball_attack_state)] = (self.jump_fireball_attack_frames, JUMP_FIREBALL_ATTACK_PERIOD)
 
             state_to_animation_dict[(hstate, glide_state, fireball_attack_state)] = (self.fireball_attack_frames, FIREBALL_ATTACK_PERIOD)
@@ -192,44 +191,44 @@ class Player(pygame.sprite.Sprite):
         self.vertical_event_queue.put('jump')
 
     def glide(self):
-        print 'GLIDE'
         self.vertical_event_queue.put('glide')
+        logging.debug('GLIDE event placed in vertical_event_queue')
 
     def slide(self):
-        print 'SLIDE'
         self._create_slidedust()
         self.horizontal_event_queue.put('slide_horizontal')
+        logging.debug('SLIDE event placed in vertical_event_queue')
 
     def fireball_attack(self):
-        print 'FIREBALL'
         self._create_fireball()
         self.attack_event_queue.put('fireball_attack')
+        logging.debug('FIREBALL event placed in attack_queue')
 
     def grenade_attack(self):
-        print 'GRENADE'
         self._create_grenade()
         self.attack_event_queue.put('grenade_attack')
+        logging.debug('FIREBALL event placed in attack_queue')
 
     def go_left(self):
-        print 'GO LEFT'
         self.direction = 'L'
         self.horizontal_event_queue.put('drive_horizontal')
+        logging.debug('drive_horizontal (LEFT) event placed in horizontal_event_queue')
 
     def go_right(self):
-        print 'GO RIGHT'
         self.direction = 'R'
         self.horizontal_event_queue.put('drive_horizontal')
+        logging.debug('drive_horizontal (LEFT) event placed in horizontal_event_queue')
 
     def stop_horizontal(self):
-        print 'HORIZONTAL KEY UP'
         self.horizontal_event_queue.put('drift_horizontal')
+        logging.debug('HORIZONTAL KEY UP: drift_horizontal_event placed in horizontal_event_queue')
 
     def stop_vertical(self):
         pass
 
     def stop_glide(self):
-        print 'GLIDE KEY UP'
         self.vertical_event_queue.put('stop_glide')
+        logging.debug('GLIDE KEY UP: HORIZONTAL KEY UP: stop_glide event placed in vertical_event_queue')
 
     def stop_slide(self):
         pass
