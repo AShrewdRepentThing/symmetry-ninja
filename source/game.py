@@ -1,9 +1,9 @@
 import os, pygame, time, levels
-#import os, time, levels
-#from pygame.locals import *
 from player import Player
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_SIZE, MAX_FRAME_RATE, IS_FULLSCREEN, TIMESTEP
+from constants import PLAYER_START_X, PLAYER_START_Y
 
+COUNT = 0
 
 class GameSession(object):
 
@@ -32,91 +32,24 @@ class GameSession(object):
         # Create player, add to sprite list
         self.active_sprite_list = pygame.sprite.Group()
         self.player.level = self.current_level
-        self.player.rect.x = 340
-        self.player.rect.y = SCREEN_HEIGHT - self.player.rect.height
+        self.player.rect.x = PLAYER_START_X
+        self.player.rect.y = PLAYER_START_Y - 500
         self.active_sprite_list.add(self.player)
 
-    def print_debug_info():
-        print 'x_velocity'
-        print self.player.x_velocity
-
-        print 'y_velocity'
-        print self.player.y_velocity
-
-        print 'is_gliding'
-        print self.player.is_gliding
-
-        print 'is_firing_fireball'
-        print self.player.is_firing_fireball
-
-        print 'is_firing_grenade'
-        print self.player.is_firing_grenade
-
-        print 'jump_cycle'
-        print self.player.jump_cycle
-
-        print 'is_jumping'
-        print self.player.is_jumping
-
-        print 'is_driven'
-        print self.player.is_driven
-
-        print 'is_firing_fireball'
-        print self.player.is_firing_fireball
-
-        print 'self.player.is_idle'
-        print self.player.is_idle
-
-        print 'jump count'
-        print self.player.jump_count
-
-        print 'direction'
-        print self.player.direction
-
-        print 'frame'
-        print self.player.frame
-
     def process_event(self, event):
+
         if event.type == pygame.QUIT: # If user clicked close
             self.done = True # Flag that we are done so we exit this loop
 
-        if event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+            self.done = True
 
-            if event.key == pygame.K_LEFT:
-                self.player.go_left()
-
-            if event.key == pygame.K_RIGHT:
-                self.player.go_right()
-
-            if event.key == pygame.K_UP:
-                self.player.jump()
-
-            if event.key == pygame.K_SPACE:
-                self.player.bullet_attack()
-
-            if event.key == pygame.K_LALT:
-                self.player.grenade_attack()
-
-            if event.key == pygame.K_LSHIFT:
-                self.player.glidedown()
-
-            if event.key == pygame.K_ESCAPE:
-                self.done = True
-
-        if event.type == pygame.KEYUP:
-
-            if event.key == pygame.K_LEFT and self.player.x_velocity < 0:
-                self.player.stop()
-
-            if event.key == pygame.K_RIGHT and self.player.x_velocity > 0:
-                self.player.stop()
-
-            if event.key == pygame.K_LSHIFT:
-                self.player.is_gliding = False
+        elif event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
+            self.player.handle_input(event)
 
     def update_everything(self):
-        self.active_sprite_list.update()
         self.current_level.update()
+        self.active_sprite_list.update()
 
         # If the self.player gets near the right side, shift the world left (-x)
         if self.player.rect.right >= 500:
@@ -166,7 +99,7 @@ class GameSession(object):
             delta_t = this_time - last_time
 
             if delta_t > 0.5:
-                self.print_debug_info()
+                pass
 
             for event in pygame.event.get(): # User did something
                 self.process_event(event)

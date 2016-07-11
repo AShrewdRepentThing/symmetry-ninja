@@ -8,6 +8,8 @@ class Platform(pygame.sprite.Sprite):
     def __init__(self, sprite_sheet_data):
 
         super(Platform, self).__init__()
+        self.x_velocity = 0
+        self.y_velocity = 0
         sprite_sheet = SpriteSheet(TILES_SS_PATH)
         self.image = sprite_sheet.get_image(sprite_sheet_data[0],
                                             sprite_sheet_data[1],
