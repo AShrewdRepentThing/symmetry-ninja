@@ -67,7 +67,8 @@ class Player(pygame.sprite.Sprite):
         drive_transitions = [(drift_horizontal_state, 'drift_horizontal'), (slide_horizontal_state, 'slide_horizontal')]
         drift_transitions = [(drive_horizontal_state, 'drive_horizontal'), (idle_horizontal_state, 'idle_horizontal'),
                              (slide_horizontal_state, 'slide_horizontal')]
-        slide_transitions = [(idle_horizontal_state, 'idle_horizontal')]
+        slide_transitions = [(idle_horizontal_state, 'idle_horizontal'), (drift_horizontal_state, 'drift_horizontal'),
+                             (drive_horizontal_state, 'drive_horizontal')]
 
         state_transition_dct = {idle_horizontal_state: idle_transitions, drive_horizontal_state: drive_transitions,
                                 drift_horizontal_state: drift_transitions, slide_horizontal_state: slide_transitions}
@@ -116,7 +117,6 @@ class Player(pygame.sprite.Sprite):
         self._create_vertical_state_machine()
         self._create_attack_state_machine()
 
-        state_machine_list = [self.horizontal_state_machine, self.vertical_state_machine, self.vertical_state_machine]
         idle_horizontal_state, drive_horizontal_state, drift_horizontal_state, slide_horizontal_state = self.horizontal_states
         on_platform_state, jump_state, fall_state, glide_state = self.vertical_states
         idle_attack_state, fireball_attack_state, grenade_attack_state = self.attack_states
@@ -195,9 +195,8 @@ class Player(pygame.sprite.Sprite):
         logging.debug('GLIDE event placed in vertical_event_queue')
 
     def slide(self):
-        self._create_slidedust()
         self.horizontal_event_queue.put('slide_horizontal')
-        logging.debug('SLIDE event placed in vertical_event_queue')
+        logging.debug('SLIDE event placed in horizontal_event_queue')
 
     def fireball_attack(self):
         self._create_fireball()

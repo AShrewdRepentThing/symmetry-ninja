@@ -22,10 +22,13 @@ class PlayerState(object):
         self.update_x()
 
     def _platform_collision(self):
-        collision_list = pygame.sprite.spritecollide(self.player, self.player.level.platform_list, False)
+        collision_list = pygame.sprite.spritecollide(self.player,
+                                                     self.player.level.platform_list,
+                                                     False)
 
         if len(collision_list) > 0:
             platform = collision_list[0]
+            logging.debug('regular platform collision')
             return platform
 
         else:
@@ -187,17 +190,23 @@ class DriftHorizontalState(PlayerState):
         self.name = 'drift_horizontal'
 
     def update_x(self):
-        #self.player.x_velocity /= DRIFT_DECEL
         self.player.x_velocity /= self.player.drift_decel
 
         if abs(self.player.x_velocity) < SLOW_TO_STOP:
             self.player.x_velocity = 0
             self.player.horizontal_event_queue.put('idle_horizontal')
+            logging.debug('In drift horizontal state, sent idle_horizontal to queue')
 
         PlayerState.update_x(self)
 
     def update_y(self):
         pass
+
+    def enter(self):
+        logging.debug('Entering drift horizontal state')
+
+    def exit(self):
+        logging.debug('Exiting drift horizontal state')
 
 
 class IdleHorizontalState(PlayerState):
@@ -206,6 +215,12 @@ class IdleHorizontalState(PlayerState):
     def __init__(self, player):
         PlayerState.__init__(self, player)
         self.name = 'idle_horizontal'
+
+    def enter(self):
+        logging.debug('Entered IdleHorizontalState')
+
+    def can_enter(self):
+        return self.player.x_velocity == 0.0
 
     def update_x(self):
         pass
@@ -221,24 +236,34 @@ class SlideHorizontalState(PlayerState):
         PlayerState.__init__(self, player)
         self.name = 'slide_horizontal'
 
+    def can_enter(self):
+        on_platform = self.player.current_platform is not None
+        logging.debug('Can enter slide state: %s' % str(on_platform))
+        return on_platform
+
     def enter(self):
-        if self.player.current_platform is None:
-            pass
-        else:
-            self.player.x_velocity = DIRDICT[self.player.direction] * SLIDE_INITIAL_VELOCITY
+        logging.debug('Entered slide state')
+        self.player._create_slidedust()
+        self.player.x_velocity = DIRDICT[self.player.direction] * SLIDE_INITIAL_VELOCITY
 
     def exit(self):
-        self.player.x_velocity = 0
+        logging.debug('Exited slide state')
 
     def update_x(self):
-        if self.player.current_platform is None:
-            pass
-        else:
-            self.player.x_velocity /= SLIDE_DECEL
+        state_now = self.player.vertical_state_machine.current_state
 
-            if abs(self.player.x_velocity) < SLOW_TO_STOP:
-                self.player.x_velocity = 0
-                self.player.horizontal_event_queue.put('idle_horizontal')
+        if isinstance(state_now, FallState):
+            print 'Falling slide'
+            logging.debug('Falling slide')
+            #self.player.horizontal_event_queue.put('drive_horizontal')
+            self.player.horizontal_event_queue.put('drift_horizontal')
+
+        self.player.x_velocity /= SLIDE_DECEL
+
+        if abs(self.player.x_velocity) < SLOW_TO_STOP:
+            logging.debug('Preparing to exit slide state: velocity = %s' % str(self.player.x_velocity))
+            self.player.x_velocity = 0
+            self.player.horizontal_event_queue.put('idle_horizontal')
 
 
 class IdleAttackState(PlayerState):
@@ -382,6 +407,7 @@ class ConcurrentStateMachine(object):
         self.frame_step = float(len(self.animation_frames[self.player.direction])) / float((self.animation_period * MAX_FRAME_RATE))
         self.current_frame = self.animation_frames[self.player.direction][self.current_frame_number]
         logging.debug('\n\nCURRENT_STATE: %s' % str(self.current_state))
+        print 'CURRENT_STATE: %s' % str(self.current_state)
 
     def set_current_rect(self):
         old_rect = self.player.rect
